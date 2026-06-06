@@ -1,0 +1,35 @@
+# Пути и названия
+CHECKPOINTS_DIR: "C:/space_ai/models/checkpoints"
+SAVED_MODELS_DIR: "C:/space_ai/models/saved_models"
+LOG_DIR: "./logs"
+MODEL_PATH: "C:/space_ai/models/YOLO_8l.pt" # модель училась на 2560х2560
+
+GAME_REGION: [0, 0, 2560, 1440] # [x, y, ширина, высота] окна игры
+IMG_WIDTH: 64
+IMG_HEIGHT: 64
+STACK_SIZE: 1
+MAX_CURSOR_DISTANCE: 12800 # величина стороны бокса (за боксом пустота)
+# Параметры обучения 
+TOTAL_TIMESTEPS: 25_000
+BATCH_SIZE: 256
+GAMMA: 0.99 # Коэффициент дисконтирования награды
+WINDOW_TITLE: "Paint"
+P_SPEED: 0.5 # Скорость движения мыши (от 0.0 до 1.0)
+DEVICE: cuda
+# Параметры награды
+REWARD_SETTINGS:
+  # 1. Базовые параметры (уже были у тебя)
+  STEP_PENALTY: 0
+  MOVEMENT_BONUS: 0.5
+  BIG_MOVE_BONUS: 0.20 
+  BIG_MOVE_THRESHOLD: 1
+  # 2. Параметры штрафа за вылет камеры (НОВЫЕ)
+  CURSOR_OOB_PENALTY: 55.0
+  # 3. Параметры таймаута (чтобы обучение не длилось вечно) (НОВЫЕ)
+  MAX_EPISODE_TIME: 600
+  NOVELTY_BONUS: 0.5
+  NOVELTY_THRESHOLD: 1.0
+  TIME_PENALTY_COEF: 0
+  INACTION_PENALTY: -0.01
+  MAX_MOVEMENT_PER_STEP: 1
+  CURSOR_MOVEMENT_SPEED: 1

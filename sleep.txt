@@ -1,0 +1,64 @@
+# sleep.py
+import logging
+
+from threading import Thread, Event
+from pynput import keyboard as pynput_keyboard
+
+# Настраиваем логгинг для этого модуля
+logger = logging.getLogger(__name__)
+
+class Sleeper:
+    """
+    Класс, отвечающий за 'сон' агента.
+    Использует библиотеку pynput для надежного прослушивания клавиш в фоновом потоке.
+    """
+
+    def __init__(self, window_title):
+        """
+        Инициализация.
+        Запускает фоновый поток для прослушивания клавиш.
+        """
+        self.window_title = window_title.lower()
+        self.paused = False
+        
+        # События для управления потоком
+        self._stop_event = Event()
+        
+        # Запускаем слушатель клавиш в отдельном потоке
+        self._listener_thread = Thread(target=self._listen_for_keys, daemon=True)
+        self._listener_thread.start()
+        logger.info("[SLEEPER] Фоновый слушатель клавиш запущен.")
+
+    def _on_press(self, key):
+        try:
+        # Было: key == ... from_char('з')
+        # Стало: key == ... from_char('z')
+            if key == pynput_keyboard.KeyCode.from_char('p') or key == pynput_keyboard.KeyCode.from_char('z'):
+                self.paused = not self.paused 
+                status = "ВКЛ" if self.paused else "ВЫКЛ"
+                logger.info(f"[SLEEPER] Режим паузы {status}.")
+                    
+    
+        except AttributeError:
+            # Игнорируем специальные клавиши (Shift, Ctrl и т.д.)
+            pass
+
+    def _listen_for_keys(self):
+        """Цикл прослушивания клавиш."""
+        # Создаем слушатель
+        with pynput_keyboard.Listener(on_press=self._on_press) as listener:
+            # Работаем, пока не придет сигнал остановки
+            while not self._stop_event.is_set():
+                listener.join(0.1) # Небольшая задержка для снижения нагрузки на CPU
+
+    def check_window_and_sleep(self):
+        """
+        Возвращает текущее состояние паузы.
+        Этот метод вызывается из основного цикла обучения.
+        """
+        return self.paused
+
+    def stop(self):
+        """Останавливает фоновый поток."""
+        self._stop_event.set()
+        logger.info("[SLEEPER] Фоновый поток остановлен.")
